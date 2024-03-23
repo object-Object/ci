@@ -35,16 +35,11 @@ runs:
     
     - if: inputs.python-version
       uses: yezz123/setup-uv@v4
-    
-    - if: inputs.python-version
-      name: Configure uv
-      shell: bash
-      run: echo "UV_SYSTEM_PYTHON=true" >> $GITHUB_ENV
 
     - if: inputs.python-version && inputs.python-packages
       name: Install Python packages
       shell: bash
-      run: uv pip install ${{ inputs.python-packages }}
+      run: uv pip install --system ${{ inputs.python-packages }}
     
     # Node
 
