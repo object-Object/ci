@@ -5,8 +5,14 @@ inputs:
   python-version:
     description: Python version to install.
     required: false
+  python-packages:
+    description: Python packages to install. Requires python-version.
+    required: false
   node-version:
     description: Node version to install.
+    required: false
+  npm-packages:
+    description: NPM packages to install. Requires node-version.
     required: false
   role-to-assume:
     description: AWS IAM role to assume when setting up AWS credentials. Enter "default" to use the global GitHub Actions CDK role.
@@ -29,11 +35,16 @@ runs:
     
     - if: inputs.python-version
       uses: yezz123/setup-uv@v4
-
-    - name: Install Nox
+    
+    - name: Configure uv
       if: inputs.python-version
       shell: bash
-      run: uv pip install nox
+      run: echo "UV_SYSTEM_PYTHON=true" >> $GITHUB_ENV
+
+    - name: Install Python packages
+      if: inputs.python-version && inputs.python-packages
+      shell: bash
+      run: uv pip install ${{ inputs.python-packages }}
     
     # Node
 
@@ -42,10 +53,10 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
-    - name: Install AWS CDK CLI
+    - name: Install NPM packages
       if: inputs.node-version
       shell: bash
-      run: npm install -g aws-cdk
+      run: npm install -g ${{ inputs.npm-packages }}
 
     # AWS
 
