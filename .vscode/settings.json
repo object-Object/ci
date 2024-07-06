@@ -1,6 +1,18 @@
 {
-    "yaml.schemas": {
-        "file:///c%3A/Users/object/.vscode/extensions/atlassian.atlascode-2.10.12/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml",
-        "https://json.schemastore.org/github-action.json": "file:///c%3A/Users/object/Git/ci/setup/action.yml"
-    }
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports.ruff": "explicit"
+        },
+        "editor.rulers": [88],
+    },
+    "ruff.organizeImports": true,
+    "ruff.lint.args": [
+        "--extend-ignore=I",
+    ],
+    "python.languageServer": "Pylance",
+    "python.analysis.diagnosticMode": "workspace",
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
 }
