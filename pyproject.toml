@@ -25,6 +25,7 @@ managed = true
 dev-dependencies = [
     "ruff>=0.5.1",
     "pre-commit",
+    "pytest>=8.2.2",
 ]
 
 [tool.rye.scripts]
@@ -74,6 +75,7 @@ pythonPlatform = "All"
 
 include = [
     "src",
+    "test",
 ]
 exclude = [
     "**/venv",
