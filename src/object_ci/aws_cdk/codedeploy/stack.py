@@ -134,14 +134,14 @@ class CodeDeployStack(cdk.Stack):
         stage: str = "prod",
         *,
         base_stack_name: str,
-        github_repo: GitHubRepository,
+        github_repo: GitHubRepository | None = None,
         on_premise_instance_tag: str = PROD_VULTR_VPS_INSTANCE_TAG,
     ):
         return cls(
             scope,
             stage,
             base_stack_name=base_stack_name,
-            github_repo=github_repo,
+            github_repo=github_repo or GitHubRepository.from_env(),
             env=cdk.Environment(
                 account=PROD_ACCOUNT,
                 region=PROD_REGION,
