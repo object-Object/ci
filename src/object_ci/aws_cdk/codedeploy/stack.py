@@ -31,7 +31,7 @@ class CodeDeployStack(cdk.Stack):
         base_stack_name: str,
         github_repo: GitHubRepository,
         env: cdk.Environment,
-        artifacts_bucket_name: str,
+        artifacts_bucket: str | s3.IBucket,
         codedeploy_environment: str,
         on_premise_instance_tag: str,
     ):
@@ -53,11 +53,16 @@ class CodeDeployStack(cdk.Stack):
             "GitHubOIDCProviderProxy",
         )
 
-        self.artifacts_bucket_proxy = s3.Bucket.from_bucket_name(
-            self,
-            "ArtifactsBucketProxy",
-            artifacts_bucket_name,
-        )
+        self.artifacts_bucket_proxy: s3.IBucket
+        match artifacts_bucket:
+            case str() as artifacts_bucket_name:
+                self.artifacts_bucket_proxy = s3.Bucket.from_bucket_name(
+                    self,
+                    "ArtifactsBucketProxy",
+                    artifacts_bucket_name,
+                )
+            case _:
+                self.artifacts_bucket_proxy = artifacts_bucket
 
         # CodeDeploy
 
@@ -88,6 +93,7 @@ class CodeDeployStack(cdk.Stack):
         )
 
         # outputs
+
         cdk.CfnOutput(
             self,
             "ApplicationName",
@@ -154,7 +160,7 @@ class CodeDeployStack(cdk.Stack):
                 account=PROD_ACCOUNT,
                 region=PROD_REGION,
             ),
-            artifacts_bucket_name=PROD_ARTIFACTS_BUCKET_NAME,
+            artifacts_bucket=PROD_ARTIFACTS_BUCKET_NAME,
             codedeploy_environment=PROD_CODEDEPLOY_ENVIRONMENT,
             on_premise_instance_tag=on_premise_instance_tag,
         )
