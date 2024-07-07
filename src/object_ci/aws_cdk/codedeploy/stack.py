@@ -113,18 +113,26 @@ class CodeDeployStack(cdk.Stack):
     def deployment_config(self) -> codedeploy.ServerDeploymentConfig:
         return codedeploy.ServerDeploymentConfig.ONE_AT_A_TIME
 
+    @property
+    def auto_rollback_config(self) -> codedeploy.AutoRollbackConfig:
+        return codedeploy.AutoRollbackConfig(
+            failed_deployment=True,
+        )
+
+    @property
+    def on_premise_instance_tags(self) -> codedeploy.InstanceTagSet:
+        return codedeploy.InstanceTagSet({
+            "instance": [self.on_premise_instance_tag],
+        })
+
     def create_deployment_group(self):
         return codedeploy.ServerDeploymentGroup(
             self,
             "DeploymentGroup",
             application=self.application,
             deployment_config=self.deployment_config,
-            auto_rollback=codedeploy.AutoRollbackConfig(
-                failed_deployment=True,
-            ),
-            on_premise_instance_tags=codedeploy.InstanceTagSet({
-                "instance": [self.on_premise_instance_tag],
-            }),
+            auto_rollback=self.auto_rollback_config,
+            on_premise_instance_tags=self.on_premise_instance_tags,
         )
 
     @classmethod
