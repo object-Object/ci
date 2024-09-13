@@ -6,13 +6,13 @@ inputs:
     description: Python version to install.
     required: false
   python-packages:
-    description: Python packages to install. Requires python-version.
+    description: Python packages to install.
     required: false
   node-version:
     description: Node version to install.
     required: false
   npm-packages:
-    description: NPM packages to install. Requires node-version.
+    description: NPM packages to install.
     required: false
   role-to-assume:
     description: AWS IAM role to assume when setting up AWS credentials. Enter "default" to use the global GitHub Actions CDK role.
@@ -31,15 +31,15 @@ runs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
-    
-    - if: inputs.python-version
+
+    - if: inputs.python-version || inputs.python-packages
       uses: yezz123/setup-uv@v4
 
-    - if: inputs.python-version && inputs.python-packages
+    - if: inputs.python-version || inputs.python-packages
       name: Install Python packages
       shell: bash
       run: uv pip install --system ${{ inputs.python-packages }}
-    
+
     # Node
 
     - if: inputs.node-version
@@ -47,7 +47,7 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
-    - if: inputs.node-version && inputs.npm-packages
+    - if: inputs.node-version || inputs.npm-packages
       name: Install NPM packages
       shell: bash
       run: npm install -g ${{ inputs.npm-packages }}
