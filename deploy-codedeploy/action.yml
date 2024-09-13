@@ -18,9 +18,6 @@ inputs:
     description: Path to the directory containing the appspec.yml file. Should not include a trailing slash.
     required: false
     default: codedeploy
-  dotenv:
-    description: Contents of a .env file to create in the deployment directory.
-    required: false
 
 outputs:
   s3-key:
@@ -36,14 +33,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set runtime environment variables
-      if: inputs.dotenv
-      shell: bash
-      run: |
-        cat <<EOF > ${{ inputs.path }}/.env
-        ${{ inputs.dotenv }}
-        EOF
-
     - name: Upload deployment bundle to S3
       id: upload-bundle
       shell: bash
