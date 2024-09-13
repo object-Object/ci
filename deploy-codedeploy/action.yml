@@ -1,0 +1,78 @@
+name: Deploy to CodeDeploy
+description: Deploys a CodeDeploy application.
+
+inputs:
+  stack:
+    description: AWS stack name of the CodeDeploy application.
+    required: true
+  application:
+    description: CodeDeploy application name.
+    required: true
+  deployment-group:
+    description: CodeDeploy deployment group name.
+    required: true
+  s3-bucket:
+    description: S3 artifacts bucket name.
+    required: true
+  path:
+    description: Path to the directory containing the appspec.yml file. Should not include a trailing slash.
+    required: false
+    default: codedeploy
+  dotenv:
+    description: Contents of a .env file to create in the deployment directory.
+    required: false
+
+outputs:
+  s3-key:
+    description: S3 key of the uploaded deployment bundle.
+    value: ${{ steps.upload-bundle.outputs.s3-key }}
+  deployment-id:
+    description: Deployment id.
+    value: ${{ steps.create-deployment.outputs.deployment-id }}
+  deployment-url:
+    description: AWS console URL for the deployment.
+    value: ${{ steps.create-deployment.outputs.deployment-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set runtime environment variables
+      if: inputs.dotenv
+      shell: bash
+      run: |
+        cat <<EOF > ${{ inputs.path }}/.env
+        ${{ inputs.dotenv }}
+        EOF
+
+    - name: Upload deployment bundle to S3
+      id: upload-bundle
+      shell: bash
+      run: |
+        S3_KEY="${{ inputs.stack }}/${{ github.sha }}.zip"
+        echo "s3-key=$S3_KEY" >> "$GITHUB_OUTPUT"
+        aws deploy push \
+          --application-name ${{ inputs.application }} \
+          --s3-location s3://${{ inputs.s3-bucket }}/$S3_KEY \
+          --source ${{ inputs.path }}
+
+    - name: Create CodeDeploy deployment
+      id: create-deployment
+      shell: bash
+      run: |
+        response="$(aws deploy create-deployment \
+          --application-name ${{ inputs.application }} \
+          --deployment-group-name ${{ inputs.deployment-group }} \
+          --s3-location "bucket=${{ inputs.s3-bucket }},key=${{ steps.upload-bundle.outputs.s3-key }},bundleType=zip")"
+
+        deployment_id="$(echo "$response" | jq '.deploymentId' --raw-output)"
+        url="https://${{ env.AWS_REGION }}.console.aws.amazon.com/codesuite/codedeploy/deployments/${deployment_id}?region=${{ env.AWS_REGION }}"
+        echo "Deployment URL: $url"
+
+        echo "deployment-id=$deployment_id" >> "$GITHUB_OUTPUT"
+        echo "deployment-url=$url" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for deployment to finish
+      shell: bash
+      run: |
+        aws deploy wait deployment-successful \
+          --deployment-id ${{ steps.create-deployment.outputs.deployment-id }}
