@@ -2,6 +2,9 @@ name: Deploy to CodeDeploy
 description: Deploys a CodeDeploy application.
 
 inputs:
+  path:
+    description: Path to the directory containing the appspec.yml file. Should not include a trailing slash.
+    required: true
   stack:
     description: AWS stack name of the CodeDeploy application.
     required: true
@@ -14,10 +17,6 @@ inputs:
   s3-bucket:
     description: S3 artifacts bucket name.
     required: true
-  path:
-    description: Path to the directory containing the appspec.yml file. Should not include a trailing slash.
-    required: false
-    default: codedeploy
 
 outputs:
   s3-key:
