@@ -5,6 +5,9 @@ inputs:
   python-version:
     description: Python version to install.
     required: false
+  python-version-file:
+    description: File containing the Python version to install.
+    required: false
   python-packages:
     description: Python packages to install.
     required: false
@@ -27,15 +30,16 @@ runs:
   steps:
     # Python
 
-    - if: inputs.python-version
+    - if: inputs.python-version || inputs.python-version-file
       uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
+        python-version-file: ${{ inputs.python-version-file }}
 
-    - if: inputs.python-version || inputs.python-packages
+    - if: inputs.python-version || inputs.python-version-file || inputs.python-packages
       uses: yezz123/setup-uv@v4
 
-    - if: inputs.python-version || inputs.python-packages
+    - if: inputs.python-version || inputs.python-version-file || inputs.python-packages
       name: Install Python packages
       shell: bash
       run: uv pip install --system ${{ inputs.python-packages }}
