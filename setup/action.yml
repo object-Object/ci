@@ -39,7 +39,7 @@ runs:
     - if: inputs.python-version || inputs.python-version-file || inputs.python-packages
       uses: yezz123/setup-uv@v4
 
-    - if: inputs.python-version || inputs.python-version-file || inputs.python-packages
+    - if: inputs.python-packages
       name: Install Python packages
       shell: bash
       run: uv pip install --system ${{ inputs.python-packages }}
@@ -51,7 +51,7 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
-    - if: inputs.node-version || inputs.npm-packages
+    - if: inputs.npm-packages
       name: Install NPM packages
       shell: bash
       run: npm install -g ${{ inputs.npm-packages }}
