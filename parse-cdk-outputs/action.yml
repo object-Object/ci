@@ -1,0 +1,32 @@
+name: Parse CDK outputs
+description: Parse an AWS CDK outputs.json file for use in further steps. Fails if more than one stack's outputs are in the file.
+
+inputs:
+  file:
+    description: File to parse.
+    default: outputs.json
+
+outputs:
+  stack-name:
+    description: AWS stack name.
+    value: ${{ steps.stack-name.outputs.value }}
+  outputs:
+    description: Stack outputs.
+    value: ${{ fromJson(steps.outputs.outputs.value) }}
+
+runs:
+  using: composite
+  steps:
+    - name: Assert exactly one stack is in the file
+      shell: bash
+      run: jq --exit-status 'length == 1' < ${{ inputs.file }}
+
+    - name: Get stack name
+      id: stack-name
+      shell: bash
+      run: echo "value=$(jq --raw-output 'keys[0]' < ${{ inputs.file }})" >> "$GITHUB_OUTPUT"
+
+    - name: Get outputs
+      id: outputs
+      shell: bash
+      run: echo "value=$(jq --compact-output '.[keys[0]]' < ${{ inputs.file }})" >> "$GITHUB_OUTPUT"
