@@ -14,9 +14,12 @@ function main() {
     }
 
     const stackName = keys[0];
+    core.info(`Stack name: ${stackName}`);
     core.setOutput("stack-name", stackName);
 
+    core.info("Stack outputs:");
     for (const [key, value] of Object.entries(data[stackName])) {
+        core.info(`  ${key} = ${value}`);
         core.setOutput(key, value);
     }
 }
