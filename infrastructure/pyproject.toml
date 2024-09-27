@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "object-ci-infrastructure"
+version = "0.1.0"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "object-ci[aws-cdk]",
+]
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/infrastructure",
+]

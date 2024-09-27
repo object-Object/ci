@@ -1,5 +1,3 @@
-import logging
-
 import aws_cdk as cdk
 import aws_cdk_github_oidc as github_oidc
 from aws_cdk import (
@@ -9,6 +7,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+from object_ci.aws_cdk.base_stack import BaseStack
 from object_ci.aws_cdk.constants import (
     PROD_ACCOUNT,
     PROD_ARTIFACTS_BUCKET_NAME,
@@ -19,39 +18,31 @@ from object_ci.aws_cdk.constants import (
 
 from .types import GitHubRepository
 
-logger = logging.getLogger(__name__)
 
-
-class CodeDeployStack(cdk.Stack):
+class CodeDeployStack(BaseStack):
     def __init__(
         self,
         scope: Construct,
         stage: str,
         *,
-        base_stack_name: str,
-        github_repo: GitHubRepository,
+        base_stack_name: str | None = None,
+        github_repo: GitHubRepository | None = None,
         env: cdk.Environment,
         artifacts_bucket: str | s3.IBucket,
         codedeploy_environment: str,
         on_premise_instance_tag: str,
     ):
-        stack_name = f"{stage}-{base_stack_name}"
-        logger.info(f"Initializing stack: {stack_name}")
         super().__init__(
             scope,
-            id=stage,
-            stack_name=stack_name,
+            stage=stage,
+            base_stack_name=base_stack_name,
+            github_repo=github_repo,
             env=env,
         )
 
         self.on_premise_instance_tag = on_premise_instance_tag
 
         # external resources
-
-        self.oidc_proxy = github_oidc.GithubActionsIdentityProvider.from_account(
-            self,
-            "GitHubOIDCProviderProxy",
-        )
 
         self.artifacts_bucket_proxy: s3.IBucket
         match artifacts_bucket:
@@ -76,8 +67,8 @@ class CodeDeployStack(cdk.Stack):
             self,
             "ActionsCodeDeployRole",
             provider=self.oidc_proxy,
-            owner=github_repo.owner,
-            repo=github_repo.repo,
+            owner=self.github_repo.owner,
+            repo=self.github_repo.repo,
             filter=f"environment:{codedeploy_environment}",
         )
         self.artifacts_bucket_proxy.grant_read_write(self.actions_role)
@@ -150,6 +141,7 @@ class CodeDeployStack(cdk.Stack):
         base_stack_name: str,
         github_repo: GitHubRepository | None = None,
         on_premise_instance_tag: str = PROD_VULTR_VPS_INSTANCE_TAG,
+        codedeploy_environment: str = PROD_CODEDEPLOY_ENVIRONMENT,
     ):
         return cls(
             scope,
@@ -161,6 +153,6 @@ class CodeDeployStack(cdk.Stack):
                 region=PROD_REGION,
             ),
             artifacts_bucket=PROD_ARTIFACTS_BUCKET_NAME,
-            codedeploy_environment=PROD_CODEDEPLOY_ENVIRONMENT,
+            codedeploy_environment=codedeploy_environment,
             on_premise_instance_tag=on_premise_instance_tag,
         )

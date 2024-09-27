@@ -18,7 +18,7 @@ inputs:
     description: NPM packages to install.
     required: false
   role-to-assume:
-    description: AWS IAM role to assume when setting up AWS credentials. Enter "default" to use the global GitHub Actions CDK role.
+    description: AWS IAM role to assume when setting up AWS credentials. Enter "default" to use the global GitHub Actions CDK role, or "repo" to use a standard per-repo role deployed by the prod-object-ci stack.
     required: false
   aws-region:
     description: AWS region.
@@ -59,11 +59,26 @@ runs:
     # AWS
 
     - if: inputs.role-to-assume
+      name: Resolve inputs.role-to-assume
+      id: resolve-role
+      shell: bash
+      run: |
+        case '${{ inputs.role-to-assume }}' in
+          default)
+            role='arn:aws:iam::511603859520:role/prod-objectobject-ca-GitHubActionsCDKRole19D97701-sweSB0Sp33WN'
+            ;;
+          repo)
+            repo="$(echo '${{ github.repository }}' | tr '/' '+')"
+            role="arn:aws:iam::511603859520:role/prodActionsCDK@${repo}"
+            ;;
+          *)
+            role='${{ inputs.role-to-assume }}'
+            ;;
+        esac
+        echo "role=${role}" >> "$GITHUB_OUTPUT"
+
+    - if: inputs.role-to-assume
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ inputs.aws-region }}
-        role-to-assume: >
-          ${{ inputs.role-to-assume == 'default'
-          && 'arn:aws:iam::511603859520:role/prod-objectobject-ca-GitHubActionsCDKRole19D97701-sweSB0Sp33WN'
-          || inputs.role-to-assume
-          }}
+        role-to-assume: ${{ steps.resolve-role.outputs.role }}

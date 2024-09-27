@@ -29,10 +29,16 @@ dev-dependencies = [
     "nox>=2024.4.15",
 ]
 
+[tool.rye.workspace]
+members = [
+    "infrastructure",
+]
+
 [tool.rye.scripts]
 setup = { chain = ["setup:sync", "setup:pre-commit"] }
 "setup:sync" = "rye sync --all-features"
 "setup:pre-commit" = "pre-commit install"
+aws-cdk = { call="infrastructure.app" }
 
 # build config
 
@@ -67,6 +73,9 @@ extend-ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+known-first-party = [
+    "object_ci",
+]
 
 # type checking
 

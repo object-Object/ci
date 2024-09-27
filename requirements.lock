@@ -10,6 +10,8 @@
 #   universal: false
 
 -e file:.
+    # via object-ci-infrastructure
+-e file:infrastructure
 attrs==23.2.0
     # via cattrs
     # via jsii
