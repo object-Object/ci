@@ -138,7 +138,7 @@ class CodeDeployStack(BaseStack):
         scope: Construct,
         stage: str = "prod",
         *,
-        base_stack_name: str,
+        base_stack_name: str | None = None,
         github_repo: GitHubRepository | None = None,
         on_premise_instance_tag: str = PROD_VULTR_VPS_INSTANCE_TAG,
         codedeploy_environment: str = PROD_CODEDEPLOY_ENVIRONMENT,
