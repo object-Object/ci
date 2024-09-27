@@ -65,9 +65,11 @@ runs:
       run: |
         case '${{ inputs.role-to-assume }}' in
           default)
+            echo 'Using global default role (note: environment name MUST be prod-aws-cdk)'
             role='arn:aws:iam::511603859520:role/prod-objectobject-ca-GitHubActionsCDKRole19D97701-sweSB0Sp33WN'
             ;;
           repo)
+            echo 'Using per-repo role'
             repo="$(echo '${{ github.repository }}' | tr '/' '+')"
             role="arn:aws:iam::511603859520:role/prodActionsCDK@${repo}"
             ;;
@@ -75,6 +77,7 @@ runs:
             role='${{ inputs.role-to-assume }}'
             ;;
         esac
+        echo "Role ARN: ${role}"
         echo "role=${role}" >> "$GITHUB_OUTPUT"
 
     - if: inputs.role-to-assume
