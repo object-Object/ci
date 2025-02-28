@@ -5,14 +5,12 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports.ruff": "explicit"
         },
-        "editor.rulers": [88],
+        "editor.rulers": [88]
     },
     "ruff.organizeImports": true,
-    "ruff.lint.args": [
-        "--extend-ignore=I",
-    ],
+    "ruff.lint.ignore": ["I"],
     "python.languageServer": "Pylance",
     "python.analysis.diagnosticMode": "workspace",
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
+    "python.testing.pytestEnabled": true
 }
