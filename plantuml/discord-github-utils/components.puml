@@ -1,0 +1,92 @@
+@startuml
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v19.0/dist
+
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/DeveloperTools/all.puml
+!include AWSPuml/General/all.puml
+!include AWSPuml/Groups/all.puml
+!include AWSPuml/ManagementGovernance/all.puml
+!include AWSPuml/SecurityIdentityCompliance/all.puml
+!include AWSPuml/Storage/all.puml
+
+$AWSGroupColoring(CloudFormationGroup, $AWSColor(ManagementGovernance))
+!define CloudFormationGroup(g_alias, g_label) $AWSDefineGroup(g_alias, g_label, CloudFormation, CloudFormationGroup)
+
+$AWSGroupColoring(GitHubActionsGroup, $AWSColor(General))
+!define GitHubActionsGroup(g_alias, g_label="GitHub Actions") $AWSDefineGroup(g_alias, g_label, GitRepository, GitHubActionsGroup)
+
+skinparam dpi 300
+
+AWSCloudGroup(cloud_group) {
+    CodeDeploy(codedeploy_instance, "prod-objectobject-ca", "On-premises instance")
+
+    CloudFormationGroup(CDKToolkit_group, "CDKToolkit") {
+        IdentityAccessManagementRole(cdk_roles, "CDK Roles", "AWS::IAM::Role")
+    }
+
+    CloudFormationGroup(objectobject_ca_group, "object-Object/objectobject.ca") {
+        IAMIdentityCenter(GitHubOIDCProvider, "GitHubOIDCProvider", "Custom::AWSCDKOpenIdConnectProvider")
+
+        User(CodeDeployInstanceUser, "CodeDeployInstanceUser", "AWS::IAM::User")
+        IdentityAccessManagementRole(CodeDeployInstanceRole, "CodeDeployInstanceRole", "AWS::IAM::Role", "permissions:\n- read CodeDeployArtifacts\n- manage deployments")
+
+        SimpleStorageServiceBucket(CodeDeployArtifacts, "CodeDeployArtifacts", "AWS::S3::Bucket")
+    }
+
+    CloudFormationGroup(ci_group, "object-Object/ci") {
+        IdentityAccessManagementRole(ActionsCDKRole, "ActionsCDKRole~--object-Object--discord-github-utils", "AWS::IAM::Role", "permissions:\n- assume CDK roles")
+    }
+
+    CloudFormationGroup(discord_github_utils_group, "object-Object/discord-github-utils") {
+        CodeDeploy(codedeploy_application, "Application", "AWS::CodeDeploy::Application")
+        CodeDeploy(codedeploy_deployment_group, "DeploymentGroup", "AWS::CodeDeploy::DeploymentGroup")
+
+        IdentityAccessManagementRole(ActionsCodeDeployRole, "ActionsCodeDeployRole", "AWS::IAM::Role", "permissions:\n- upload to CodeDeployArtifacts\n- create deployments")
+    }
+}
+
+Genericdatabase(ghcr, "GitHub Container Registry", "ghcr.io")
+
+GitHubActionsGroup(github_actions_group) {
+    package "docker" as docker_env {
+        component [push-image] as push_image_job
+    }
+
+    package "prod-aws-cdk" as prod_aws_cdk_env {
+        component [deploy-aws-cdk] as deploy_aws_cdk_job
+    }
+
+    package "prod-codedeploy" as prod_codedeploy_env {
+        component [deploy-codedeploy] as deploy_codedeploy_job
+    }
+}
+
+ServerContentsGroup(vps_group, "objectobject.ca VPS") {
+    CodeDeploy(codedeploy_agent, "CodeDeploy Agent", "")
+    Servers(docker_compose, "Docker Compose", "")
+}
+
+ActionsCDKRole -up-> cdk_roles : assumes
+
+codedeploy_agent --> CodeDeployInstanceUser : authenticates as
+codedeploy_agent --> CodeDeployInstanceRole : assumes
+codedeploy_agent --> codedeploy_instance : checks for deployments
+codedeploy_agent --> CodeDeployArtifacts : downloads deployment bundle
+codedeploy_agent -> docker_compose : executes via scripts in deployment bundle
+
+docker_compose --> ghcr : pulls image
+
+codedeploy_deployment_group -left- codedeploy_application
+codedeploy_deployment_group -up-> codedeploy_instance : creates deployments via instance tag
+
+push_image_job -up--> ghcr : pushes image
+
+deploy_aws_cdk_job -up-> ActionsCDKRole : authenticates as
+deploy_aws_cdk_job -up-> discord_github_utils_group : deploys CDK stack
+
+deploy_codedeploy_job -up-> ActionsCodeDeployRole : authenticates as
+deploy_codedeploy_job -up--> CodeDeployArtifacts : uploads deployment bundle
+deploy_codedeploy_job -up-> codedeploy_deployment_group : creates deployment
+
+@enduml
