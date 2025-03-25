@@ -31,6 +31,7 @@ class CodeDeployStack(BaseStack):
         artifacts_bucket: str | s3.IBucket,
         codedeploy_environment: str,
         on_premise_instance_tag: str,
+        application_name: str | None = None,
     ):
         super().__init__(
             scope,
@@ -57,7 +58,11 @@ class CodeDeployStack(BaseStack):
 
         # CodeDeploy
 
-        self.application = codedeploy.ServerApplication(self, "Application")
+        self.application = codedeploy.ServerApplication(
+            self,
+            "Application",
+            application_name=application_name,
+        )
 
         self.deployment_group = self.create_deployment_group()
 
@@ -142,6 +147,7 @@ class CodeDeployStack(BaseStack):
         github_repo: GitHubRepository | None = None,
         on_premise_instance_tag: str = PROD_VULTR_VPS_INSTANCE_TAG,
         codedeploy_environment: str = PROD_CODEDEPLOY_ENVIRONMENT,
+        application_name: str | None = None,
     ):
         return cls(
             scope,
@@ -155,4 +161,5 @@ class CodeDeployStack(BaseStack):
             artifacts_bucket=PROD_ARTIFACTS_BUCKET_NAME,
             codedeploy_environment=codedeploy_environment,
             on_premise_instance_tag=on_premise_instance_tag,
+            application_name=application_name,
         )
