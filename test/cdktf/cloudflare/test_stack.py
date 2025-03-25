@@ -3,6 +3,7 @@
 from typing import cast
 
 import pytest
+
 from object_ci.cdktf.cloudflare import CloudflareStack, RecordName
 
 

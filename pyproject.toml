@@ -23,7 +23,7 @@ cdktf = [
 [tool.rye]
 managed = true
 dev-dependencies = [
-    "ruff>=0.5.1",
+    "ruff>=0.11.2",
     "pre-commit",
     "pytest>=8.2.2",
     "nox>=2024.4.15",
