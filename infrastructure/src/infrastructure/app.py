@@ -31,6 +31,16 @@ def main():
                 repo="discord-github-utils",
                 github_environment="prod-aws-cdk",
             ),
+            CIRepository(
+                owner="object-Object",
+                repo="HexBug",
+                github_environment="beta-aws-cdk",
+            ),
+            CIRepository(
+                owner="object-Object",
+                repo="HexBug",
+                github_environment="prod-aws-cdk",
+            ),
         ],
     )
 
