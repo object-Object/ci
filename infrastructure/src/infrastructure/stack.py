@@ -10,7 +10,7 @@ from object_ci.types import GitHubRepository
 
 
 @dataclass(kw_only=True)
-class CIRepository(GitHubRepository):
+class GitHubEnvironment(GitHubRepository):
     github_environment: str
 
 
@@ -21,7 +21,7 @@ class Stack(BaseStack):
         stage: str,
         *,
         env: Environment,
-        repos: list[CIRepository],
+        repos: list[GitHubEnvironment],
     ):
         super().__init__(
             scope,

@@ -5,7 +5,7 @@ import aws_cdk as cdk
 from object_ci.aws_cdk.constants import PROD_ENVIRONMENT
 from object_ci.logging import setup_logging
 
-from .stack import CIRepository, Stack
+from .stack import GitHubEnvironment, Stack
 
 logger = logging.getLogger(__name__)
 
@@ -21,22 +21,22 @@ def main():
         "prod",
         env=PROD_ENVIRONMENT,
         repos=[
-            CIRepository(
+            GitHubEnvironment(
                 owner="object-Object",
                 repo="ci",
                 github_environment="aws-cdk",
             ),
-            CIRepository(
+            GitHubEnvironment(
                 owner="object-Object",
                 repo="discord-github-utils",
                 github_environment="prod-aws-cdk",
             ),
-            CIRepository(
+            GitHubEnvironment(
                 owner="object-Object",
                 repo="HexBug",
                 github_environment="beta-aws-cdk",
             ),
-            CIRepository(
+            GitHubEnvironment(
                 owner="object-Object",
                 repo="HexBug",
                 github_environment="prod-aws-cdk",
