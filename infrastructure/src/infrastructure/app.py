@@ -31,15 +31,11 @@ def main():
                 repo="discord-github-utils",
                 github_environment="prod-aws-cdk",
             ),
+            # TODO: is there a way to do this without a wildcard?
             GitHubEnvironment(
                 owner="object-Object",
                 repo="HexBug",
-                github_environment="beta-aws-cdk",
-            ),
-            GitHubEnvironment(
-                owner="object-Object",
-                repo="HexBug",
-                github_environment="prod-aws-cdk",
+                github_environment="*-aws-cdk",
             ),
         ],
     )
