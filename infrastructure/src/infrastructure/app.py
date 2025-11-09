@@ -37,6 +37,11 @@ def main():
                 repo="HexBug",
                 github_environment="*-aws-cdk",
             ),
+            GitHubEnvironment(
+                owner="object-Object",
+                repo="cloud-catcher",
+                github_environment="aws-cdk",
+            ),
         ],
     )
 
